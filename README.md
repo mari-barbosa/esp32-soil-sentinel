@@ -1,5 +1,7 @@
 # 🌱 ESP32 Soil Sentinel
 
+[![Ko-Fi](https://img.shields.io/badge/Ko--fi-Support%20Me-ff5e5b?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/maribarbosa)
+
 **A Smart Plant Monitoring System with Multi-Profile Support**
 
 ![Project Banner](schematics/ESP32-Soil-Sentinel.png)
@@ -274,7 +276,17 @@ Contributions are welcome! Here are some ideas:
 - [ ] Web server for local real-time dashboard (no internet required)
 - [ ] SD card logging for offline data backup and analysis
 
-## 📄 License
+## � Support the Project
+
+If this project helped you or you'd like to support future development:
+
+<a href='https://ko-fi.com/maribarbosa' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi2.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+
+Your support helps maintain and improve this project! 🌱
+
+---
+
+## �📄 License
 
 This project is open source and available under the [MIT License](LICENSE).
 

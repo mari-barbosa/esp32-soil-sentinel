@@ -199,62 +199,51 @@ void selectionScreen() {
   }
 }
 
-// ============================================================================
-// MONITORING AND DATA TRANSMISSION
-// Reads sensors, analyzes soil conditions, displays on LCD, and sends to ThingSpeak
-// ============================================================================
+// --- Monitoring and Sending Function ---
 void monitoringAndSendingScreen() {
   lastConnectionTime = millis();
   
-  // Ensure WiFi connection is active
   if (WiFi.status() != WL_CONNECTED) {
     connectWiFi();
   }
 
-  // Get the selected plant's calibration profile
+  // Get the selected plant profile
   PlantProfile currentProfile = plantProfiles[selectedPlantIndex];
 
-  // -------- Read Sensors --------
+  // Sensor readings
   int soilMoistureValue = analogRead(SOIL_SENSOR_PIN);
-  float temperature = dht.readTemperature();  // Celsius
-  float airHumidity = dht.readHumidity();     // Percentage
+  float temperature = dht.readTemperature();
+  float airHumidity = dht.readHumidity();
 
-  // Validate DHT sensor readings
   if (isnan(temperature) || isnan(airHumidity)) {
     Serial.println("Error reading from DHT sensor!");
     return;
   }
 
-  // -------- Analyze Soil Condition --------
-  // Note: Higher analog value = drier soil (capacitive sensors work inversely)
+  // Analysis 
   String soilStatus = "";
-  if (soilMoistureValue > currentProfile.drySoilMoisture) { 
-    soilStatus = "Water the soil"; 
-  } 
-  else if (soilMoistureValue < currentProfile.wetSoilMoisture) { 
-    soilStatus = "Soil too wet"; 
-  } 
-  else { 
-    soilStatus = "Ideal soil"; 
-  }
+  if (soilMoistureValue > currentProfile.drySoilMoisture) { soilStatus = "Water the soil"; } 
+  else if (soilMoistureValue < currentProfile.wetSoilMoisture) { soilStatus = "Soil too wet"; } 
+  else { soilStatus = "Ideal soil"; }
 
-  // -------- Display on LCD --------
+  // LCD Display 
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("T:" + String(temperature, 1) + "C H:" + String(airHumidity, 1) + "%");
   lcd.setCursor(0, 1);
   lcd.print(soilStatus);
 
-  // -------- Send Data to ThingSpeak --------
-  ThingSpeak.setField(1, temperature);         // Field 1: Temperature (°C)
-  ThingSpeak.setField(2, soilMoistureValue);   // Field 2: Raw soil moisture value
-  ThingSpeak.setField(3, airHumidity);         // Field 3: Air humidity (%)
+ 
+  // Now we use the keys and IDs specific to the selected plant
+  
+  ThingSpeak.setField(1, temperature);
+  ThingSpeak.setField(2, soilMoistureValue);
+  ThingSpeak.setField(3, airHumidity);
   ThingSpeak.setStatus("Plant: " + currentProfile.name + " - " + soilStatus);
   
-  // Transmit to plant-specific channel
+  // Send data to the CORRECT CHANNEL with the CORRECT KEY
   int httpCode = ThingSpeak.writeFields(currentProfile.channelID, currentProfile.apiKey.c_str());
   
-  // Log transmission result
   if (httpCode == 200) {
     Serial.println("Data sent to channel: " + currentProfile.name);
   } else {
@@ -262,38 +251,28 @@ void monitoringAndSendingScreen() {
   }
 }
 
-// ============================================================================
-// WiFi CONNECTION HANDLER
-// Attempts to connect to WiFi with visual feedback on LCD
-// Maximum 20 attempts (10 seconds) before timeout
-// ============================================================================
+// --- Connect to Wi-Fi Function  ---
 void connectWiFi() {
-  // Skip if already connected
   if (WiFi.status() == WL_CONNECTED) { return; }
-  
-  // Start connection attempt
   WiFi.begin(ssid, password);
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Connecting WiFi");
-  
-  // Wait for connection with timeout
   int attempts = 0;
   while (WiFi.status() != WL_CONNECTED && attempts < 20) {
     lcd.print(".");
     delay(500);
     attempts++;
   }
-  
-  // Display connection result
-  lcd.clear();
-  lcd.setCursor(0, 0);
   if(WiFi.status() == WL_CONNECTED) {
+    lcd.clear();
+    lcd.setCursor(0, 0);
     lcd.print("Connected!");
   } else {
+    lcd.clear();
+    lcd.setCursor(0, 0);
     lcd.print("Connection failed");
   }
-  
   delay(1000);
   lcd.clear();
 }
